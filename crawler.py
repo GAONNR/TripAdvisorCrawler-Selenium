@@ -3,7 +3,7 @@ import time
 import sys
 import json
 
-driver = webdriver.Chrome('/usr/local/bin/chromedriver')
+driver = webdriver.PhantomJS('/usr/local/bin/phantomjs')
 
 baseURL = 'https://www.tripadvisor.co.kr/'
 
@@ -54,7 +54,7 @@ def get_10reviews(driver, idx, review_kind, location_code):
     time.sleep(3)
 
     raw_reviews = driver.find_elements_by_css_selector(
-        '#taplc_location_reviews_list_0 .listContainer .review-container')
+        '.listContainer .review-container')
     for raw_review in raw_reviews:
         reviews.append({
             'title': process_utf8(raw_review.find_element_by_css_selector(
@@ -91,8 +91,9 @@ def parse_hotel_reviews(url):
             print('started crawling %d' % uid[1])
             all_reviews = []
             for i in range(number_of_reviews // 10):
-                all_reviews += get_10reviews(
+                temp = get_10reviews(
                     driver, i, 'Restaurant_Review', uid[1])
+                all_reviews += temp
 
             json.dump(all_reviews, f)
             print('finished crawling %d' % uid[1])
