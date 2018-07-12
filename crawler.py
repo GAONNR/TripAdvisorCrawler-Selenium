@@ -3,7 +3,7 @@ import time
 import sys
 import json
 
-driver = webdriver.PhantomJS('/usr/local/bin/phantomjs')
+driver = webdriver.PhantomJS('/usr/bin/phantomjs')
 
 baseURL = 'https://www.tripadvisor.co.kr/'
 
@@ -14,10 +14,12 @@ seoul_hotels_url = 'https://www.tripadvisor.co.kr/Hotels-g294197'
 
 
 def get_full_url(review_kind, location_code, idx):
-    return '%s%s-d%d-Reviews-or%d' % (baseURL,
-                                      review_kind,
-                                      location_code,
-                                      idx * 10 + 10)
+    if idx > 0:
+        return '%s%s-d%d-Reviews-or%d' % (baseURL,
+                                          review_kind,
+                                          location_code,
+                                          idx * 5)
+    return '%s%s-d%d-Reviews' % (baseURL, review_kind, location_code)
 
 
 def process_utf8(webstr):
@@ -42,28 +44,32 @@ def get_recommend(raw_review):
     return recommend
 
 
-def get_10reviews(driver, idx, review_kind, location_code):
+def get_5reviews(driver, idx, review_kind, location_code):
     reviews = []
 
+    print(get_full_url(review_kind, location_code, idx))
     driver.get(get_full_url(review_kind, location_code, idx))
-    time.sleep(3)
+    time.sleep(5)
 
-    show_more_buttons = driver.find_element_by_css_selector(
-        '.listContainer .review-container .ulBlueLinks')
-    show_more_buttons.click()
-    time.sleep(3)
+    try:
+        show_more_buttons = driver.find_element_by_css_selector(
+            '.listContainer .review-container .ulBlueLinks')
+        show_more_buttons.click()
+        time.sleep(3)
 
-    raw_reviews = driver.find_elements_by_css_selector(
-        '.listContainer .review-container')
-    for raw_review in raw_reviews:
-        reviews.append({
-            'title': process_utf8(raw_review.find_element_by_css_selector(
-                '.noQuotes').text),
-            'score': get_overview_score(raw_review),
-            'recommend': get_recommend(raw_review),
-            'text': process_utf8(raw_review.find_element_by_css_selector(
-                '.partial_entry').text)
-        })
+        raw_reviews = driver.find_elements_by_css_selector(
+            '.listContainer .review-container')
+        for raw_review in raw_reviews:
+            reviews.append({
+                'title': raw_review.find_element_by_css_selector(
+                    '.noQuotes').text,
+                'score': get_overview_score(raw_review),
+                'recommend': get_recommend(raw_review),
+                'text': raw_review.find_element_by_css_selector(
+                    '.partial_entry').text
+            })
+    except:
+        return []
 
     return reviews
 
@@ -78,7 +84,7 @@ def parse_hotel_reviews(url):
             back_parameter = '-oa%d' % i * 30
 
         driver.get(seoul_hotels_url + back_parameter)
-        time.sleep(3)
+        time.sleep(5)
         raw_hotels = driver.find_elements_by_css_selector(
             '.listing_title a')
 
@@ -87,15 +93,16 @@ def parse_hotel_reviews(url):
         all_hotel_uids += list(hotel_uids)
 
     for uid in all_hotel_uids:
-        with open('reviews/%s-%d.json' % uid, 'w') as f:
+        with open('reviews/%s-%d.json' % uid, 'w', encoding='utf8') as f:
             print('started crawling %d' % uid[1])
             all_reviews = []
-            for i in range(number_of_reviews // 10):
-                temp = get_10reviews(
+            for i in range(number_of_reviews // 5):
+                temp = get_5reviews(
                     driver, i, 'Restaurant_Review', uid[1])
                 all_reviews += temp
 
-            json.dump(all_reviews, f)
+            print(len(all_reviews))
+            json.dump(all_reviews, f, ensure_ascii=False)
             print('finished crawling %d' % uid[1])
 
 
