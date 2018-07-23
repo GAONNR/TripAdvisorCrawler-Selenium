@@ -8,7 +8,7 @@ driver = webdriver.PhantomJS('/usr/bin/phantomjs')
 baseURL = 'https://www.tripadvisor.co.kr/'
 
 number_of_reviews = 100
-number_of_locations = 30
+number_of_locations = 60
 
 seoul_hotels_url = 'https://www.tripadvisor.co.kr/Hotels-g294197'
 
