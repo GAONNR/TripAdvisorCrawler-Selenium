@@ -2,8 +2,15 @@ from selenium import webdriver
 import time
 import sys
 import json
+import pprint
 
-driver = webdriver.PhantomJS('/usr/bin/phantomjs')
+pp = pprint.PrettyPrinter(indent=4)
+
+options = webdriver.ChromeOptions()
+options.add_argument('headless')
+options.add_argument('window-size=1920x1080')
+
+driver = webdriver.Chrome('/usr/local/bin/chromedriver', chrome_options=options)
 
 baseURL = 'https://www.tripadvisor.co.kr/'
 
@@ -55,7 +62,7 @@ def get_5reviews(driver, idx, review_kind, location_code):
         show_more_buttons = driver.find_element_by_css_selector(
             '.listContainer .review-container .ulBlueLinks')
         show_more_buttons.click()
-        time.sleep(3)
+        time.sleep(5)
 
         raw_reviews = driver.find_elements_by_css_selector(
             '.listContainer .review-container')
@@ -81,7 +88,7 @@ def parse_hotel_reviews(url):
     for i in range(number_of_locations // 30):
         back_parameter = ''
         if i != 0:
-            back_parameter = '-oa%d' % i * 30
+            back_parameter = '-oa%d' % (i * 30)
 
         driver.get(seoul_hotels_url + back_parameter)
         time.sleep(5)
@@ -91,6 +98,8 @@ def parse_hotel_reviews(url):
         hotel_uids = map(lambda x: (process_utf8(x.text).replace(' ', '_'),
                                     int(x.get_attribute('id').split('_')[-1])), raw_hotels)
         all_hotel_uids += list(hotel_uids)
+    pp.pprint(all_hotel_uids)
+    print('=======================')
 
     for uid in all_hotel_uids:
         with open('reviews/%s-%d.json' % uid, 'w', encoding='utf8') as f:
