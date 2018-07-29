@@ -4,3 +4,4 @@ reviews/*
 tagged_reviews/*
 ghostdriver.log
 .DS_Store
+*.numbers
