@@ -5,3 +5,6 @@ tagged_reviews/*
 ghostdriver.log
 .DS_Store
 *.numbers
+.tags*
+test.py
+result.txt

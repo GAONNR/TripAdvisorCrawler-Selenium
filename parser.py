@@ -6,11 +6,13 @@ import json
 import csv
 
 grammar = '''
-NP: {<N.*>*<Suffix>?}   # Noun phrase
+NP: {<N.*>*<X.*>?}      # Noun phrase
 VP: {<V.*>*}            # Verb phrase
 AP: {<A.*>*}            # Adjective phrase
+CLAUSE: {<NP|VP|AP|J.*|P.*|M.*|I.*|F.*>*<E.*|S.*>*}
 '''
 
+hannanum = konlpy.tag.Hannanum()
 parser = nltk.RegexpParser(grammar)
 classification = dict()
 senti_dict = dict()
@@ -94,14 +96,8 @@ def sentiment_analysis(subtrees):
 
 
 def parse_review(review):
-    words = konlpy.tag.Twitter().pos(review['text'], norm=True, stem=True)
-    real_words = []
-    for word in words:
-        if word[1] in ['Verb', 'Adjective']:
-            real_words.append((word[0][:-1], word[1]))
-        else:
-            real_words.append(word)
-    chunks = parser.parse(real_words)
+    words = hannanum.pos(review['text'])
+    chunks = parser.parse(words)
 
     subtrees = list(chunks.subtrees())
     return (chunks, sentiment_analysis(subtrees))
@@ -122,17 +118,17 @@ def open_reviews():
             for review in raw_data:
                 temp = parse_review(review)
                 c += 1
-                total_score.add(temp)
+                total_score.add(temp[1])
 
                 res.write('\n')
-                res.write(review['title'])
+                res.write('[%s]' % review['title'])
                 res.write('\n')
                 res.write(review['text'])
                 res.write('\n')
                 if test is True:
-                    res.write(temp[0].pprint())
+                    temp[0].pprint(stream=res)
                     res.write('\n')
-                res.write(str(temp)[1])
+                res.write(str(temp[1]))
                 res.write('\n\n')
 
                 # print(review['title'])
