@@ -15,6 +15,8 @@ parser = nltk.RegexpParser(grammar)
 classification = dict()
 senti_dict = dict()
 
+test = False
+
 
 class Score:
     def __init__(self):
@@ -102,7 +104,7 @@ def parse_review(review):
     chunks = parser.parse(real_words)
 
     subtrees = list(chunks.subtrees())
-    return sentiment_analysis(subtrees)
+    return (chunks, sentiment_analysis(subtrees))
 
 
 def open_reviews():
@@ -127,11 +129,16 @@ def open_reviews():
                 res.write('\n')
                 res.write(review['text'])
                 res.write('\n')
-                res.write(str(temp))
+                if test is True:
+                    res.write(temp[0].pprint())
+                    res.write('\n')
+                res.write(str(temp)[1])
                 res.write('\n\n')
 
                 # print(review['title'])
                 # print(temp)
+        if test is True:
+            break
 
     res.write('\n\n======TOTAL======\n')
     res.write('서비스: %f\n' % (total_score.get('서비스') / c))
@@ -145,6 +152,9 @@ def open_reviews():
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'test':
+            test = True
     classification = load_classification(classification)
     load_senti_dict(senti_dict)
     open_reviews()
