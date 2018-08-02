@@ -8,3 +8,4 @@ ghostdriver.log
 .tags*
 test.py
 result.txt
+analyzed_reviews/*
