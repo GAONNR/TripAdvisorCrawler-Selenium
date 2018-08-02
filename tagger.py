@@ -1,4 +1,4 @@
-from konlpy.tag import Twitter
+from konlpy.tag import Kkma
 import glob
 import sys
 import json
@@ -6,7 +6,7 @@ import csv
 
 
 def tag_all_reviews(norm, stem):
-    twitter = Twitter()
+    kkma = Kkma()
     recommend_categories = set()
     nouns = dict()
 
@@ -16,13 +16,13 @@ def tag_all_reviews(norm, stem):
             raw_data = json.load(raw_file)
 
             for review in raw_data:
-                raw_tags = twitter.pos(
-                    review['text'], norm=norm, stem=stem)
+                raw_tags = kkma.pos(
+                    review['text'])
                 review['tagged'] = list()
                 for tag in raw_tags:
-                    if tag[1] in ['Noun', 'Adjective', 'Verb']:
+                    if tag[1][0] in ['N', 'V']:
                         review['tagged'].append(tag)
-                    if tag[1] == 'Noun':
+                    if tag[1][0] == 'N':
                         if tag[0] in nouns:
                             nouns[tag[0]] += 1
                         else:
