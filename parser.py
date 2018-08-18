@@ -9,7 +9,7 @@ grammar = '''
 CLAUSE: {<N.*|V.*|J.*|M.*|I.*|O.*|U.*|X.*>*<E.*|S.*>*}
 '''
 
-blacklist = ['안', '하', '분']
+blacklist = []
 
 hannanum = konlpy.tag.Hannanum()
 kkma = konlpy.tag.Kkma()
@@ -40,7 +40,7 @@ class Score:
         }
 
     def increase(self, category, amount):
-        self.score_dict[category] += amount
+        self.score_dict[category] += amount**3
         self.score_num[category] += 1
 
     def get(self, category):
